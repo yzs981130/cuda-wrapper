@@ -4,9 +4,12 @@
 #include <cuda.h>
 #include <string.h>
 #include <pthread.h>
-#define SIZE 10000
-unsigned long long mod = 9973L;
+#include <stdlib.h>
 
+#define SIZE 10000
+
+unsigned long long mod = 9973L;
+static const char CONFIG_STRING[] = "WRAPPER_MAX_MEMORY";
 static const char LIB_STRING[] = "libcuda.so";
 
 int open_flag = 0;
@@ -82,6 +85,18 @@ size_t getHash(unsigned long long key) {
     }
 }
 
+void set_quota() {
+    char *q = NULL;
+    q = getenv(CONFIG_STRING);
+    if (q == NULL) {
+        printf("set_quota: no env %s found. use default: %zu", CONFIG_STRING, total_quota);
+    }
+    else {
+        total_quota = strtoull(q, NULL, 10);
+        printf("set_quota: set total_quota: %zu", total_quota);
+    }
+}
+
 void init_func() {
     if(open_flag == 0 && handle == NULL) {
         //char *error;
@@ -94,6 +109,7 @@ void init_func() {
     	dlerror();
     }
     pthread_mutex_init(&mem_cnt_lock, NULL);
+    set_quota();
 }
 
 void before_func() {
@@ -134,6 +150,7 @@ CUresult cuMemGetInfo_v2(size_t *free, size_t *total) {
     }
     CUresult r;
     r = checkCudaErrors((*fakecuMemGetInfo_v2)(free, total));
+    //TODO: change free and total to proper value
     //*free =  *free / 2;
     //*total = *total / 2;
     printf("cumemgetinfo: free : %zu, total : %zu\n", *free, *total);
