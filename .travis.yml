@@ -43,7 +43,7 @@ before_install:
   - PATH=${CUDA_HOME}/bin:${PATH}
   - sudo ln -s $CUDA_HOME /usr/local/cuda
   - sudo ldconfig
-  - sudo ls -l /usr/lib/x86_64-linux-gnu | grep libcuda.so
+  - sudo ls -l /usr/lib/x86_64-linux-gnu
 
 
 script:
