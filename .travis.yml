@@ -42,6 +42,7 @@ before_install:
   - LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
   - PATH=${CUDA_HOME}/bin:${PATH}
   - sudo ln -s $CUDA_HOME /usr/local/cuda
+  - sudo ldconfig
 
 
 script:
