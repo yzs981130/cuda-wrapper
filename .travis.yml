@@ -44,7 +44,7 @@ before_install:
   - sudo ln -s $CUDA_HOME /usr/local/cuda
   - sudo ldconfig
   - echo $LD_LIBRARY_PATH
-  - ls -l ${CUDA_HOME}/stubs
+  - sudo find / -name libcuda.so
 
 
 script:
