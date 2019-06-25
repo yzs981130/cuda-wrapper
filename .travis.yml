@@ -26,20 +26,22 @@ matrix:
     - UBUNTU_VERSION=ubuntu1804
     dist: bionic
 before_install:
-- INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
-- wget http://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/${INSTALLER}
-- sudo dpkg -i ${INSTALLER}
-- wget https://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/7fa2af80.pub
-- sudo apt-key add 7fa2af80.pub
-- sudo apt update -qq
-- sudo apt install -y cuda-core-${CUDA_APT} cuda-cudart-dev-${CUDA_APT} cuda-cufft-dev-${CUDA_APT}
-- sudo apt clean
-- CUDA_HOME=/usr/local/cuda-${CUDA_SHORT}
-- export LD_LIBRARY_PATH=${CUDA_HOME}/targets/x86_64-linux/lib/stubs:${LD_LIBRARY_PATH}
-- PATH=${CUDA_HOME}/bin:${PATH}
-- sudo ln -s $CUDA_HOME /usr/local/cuda
+  - INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
+  - wget http://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/${INSTALLER}
+  - sudo dpkg -i ${INSTALLER}
+  - wget https://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/7fa2af80.pub
+  - sudo apt-key add 7fa2af80.pub
+  - sudo apt update -qq
+  - sudo apt install -y cuda-core-${CUDA_APT} cuda-cudart-dev-${CUDA_APT} cuda-cufft-dev-${CUDA_APT}
+  - sudo apt clean
+  - CUDA_HOME=/usr/local/cuda-${CUDA_SHORT}
+  - export LD_LIBRARY_PATH=${CUDA_HOME}/targets/x86_64-linux/lib/stubs:${LD_LIBRARY_PATH}
+  - PATH=${CUDA_HOME}/bin:${PATH}
+  - sudo ln -s $CUDA_HOME /usr/local/cuda
+  - sudo cp /usr/local/cuda/targets/x86_64-linux/lib/stubs/libcuda.so /usr/lib/
 script:
 - "./build.sh"
+
 deploy:
   provider: releases
   api_key:
