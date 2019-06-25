@@ -48,3 +48,4 @@ deploy:
   file: release/*
   on:
     repo: yzs981130/cuda-wrapper
+    tags: true
