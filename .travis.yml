@@ -41,6 +41,8 @@ before_install:
 - sudo cp /usr/local/cuda/targets/x86_64-linux/lib/stubs/libcuda.so /usr/lib/
 script:
 - "./build.sh"
+- find release -type f -name *so -exec mv '{}' '{}'${CUDA_SHORT} \;
+- ls -l release/
 
 before_deploy:
   - export RELEASE_FILE=$(ls release/*.so)
