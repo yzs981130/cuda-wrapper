@@ -1,49 +1,50 @@
 language: cpp
-
 sudo: enabled
-
 compiler:
-  - gcc
-
+- gcc
 matrix:
   include:
-    - name: CUDA 8
-      env:
-      - CUDA=8.0.61-1
-      - CUDA_SHORT=8.0
-      - CUDA_APT=8-0
-      - UBUNTU_VERSION=ubuntu1604
-      dist: xenial
-    - name: CUDA 9
-      env:
-      - CUDA=9.2.148-1
-      - CUDA_SHORT=9.2
-      - CUDA_APT=9-2
-      - UBUNTU_VERSION=ubuntu1604
-      dist: xenial
-    - name: CUDA 10
-      env:
-      - CUDA=10.1.105-1
-      - CUDA_APT=10-1
-      - CUDA_SHORT=10.1
-      - UBUNTU_VERSION=ubuntu1804
-      dist: bionic
-
+  - name: CUDA 8
+    env:
+    - CUDA=8.0.61-1
+    - CUDA_SHORT=8.0
+    - CUDA_APT=8-0
+    - UBUNTU_VERSION=ubuntu1604
+    dist: xenial
+  - name: CUDA 9
+    env:
+    - CUDA=9.2.148-1
+    - CUDA_SHORT=9.2
+    - CUDA_APT=9-2
+    - UBUNTU_VERSION=ubuntu1604
+    dist: xenial
+  - name: CUDA 10
+    env:
+    - CUDA=10.1.105-1
+    - CUDA_APT=10-1
+    - CUDA_SHORT=10.1
+    - UBUNTU_VERSION=ubuntu1804
+    dist: bionic
 before_install:
-  - INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
-  - wget http://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/${INSTALLER}
-  - sudo dpkg -i ${INSTALLER}
-  - wget https://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/7fa2af80.pub
-  - sudo apt-key add 7fa2af80.pub
-  - sudo apt update -qq
-  - sudo apt install -y cuda-core-${CUDA_APT} cuda-cudart-dev-${CUDA_APT} cuda-cufft-dev-${CUDA_APT}
-  - sudo apt clean
-  - CUDA_HOME=/usr/local/cuda-${CUDA_SHORT}
-  - export LD_LIBRARY_PATH=${CUDA_HOME}/targets/x86_64-linux/lib/stubs:${LD_LIBRARY_PATH}
-  - PATH=${CUDA_HOME}/bin:${PATH}
-  - sudo ln -s $CUDA_HOME /usr/local/cuda
-  - echo $LD_LIBRARY_PATH
-
-
+- INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
+- wget http://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/${INSTALLER}
+- sudo dpkg -i ${INSTALLER}
+- wget https://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/7fa2af80.pub
+- sudo apt-key add 7fa2af80.pub
+- sudo apt update -qq
+- sudo apt install -y cuda-core-${CUDA_APT} cuda-cudart-dev-${CUDA_APT} cuda-cufft-dev-${CUDA_APT}
+- sudo apt clean
+- CUDA_HOME=/usr/local/cuda-${CUDA_SHORT}
+- export LD_LIBRARY_PATH=${CUDA_HOME}/targets/x86_64-linux/lib/stubs:${LD_LIBRARY_PATH}
+- PATH=${CUDA_HOME}/bin:${PATH}
+- sudo ln -s $CUDA_HOME /usr/local/cuda
 script:
-    - ./build.sh
+- "./build.sh"
+deploy:
+  provider: releases
+  api_key:
+    secure: fOnKq/d1GPGfXdqz0NNDOGBKAjw6hrlP2athC+sDKWIw4oVn+iEvg5QOyvXtWTrwTXAMPAjRkN4zpdsEUA/F+CH+9PD8UOJrNr916gZih+XgnZ1ctoRG0EotJas11YBm76kDqlXl0xv0lp80dPJnwsyJjz5x1tnXBW5/KumwarfnNNKYovGpwKGn5Au3HhV6GRANg/z3wy7p9t4xSL/h8z0ebMkxOlicmpRcHBGVP9nrxHqJ+38OtwQKn2s9rVd8UEBlRe6Yrox4/aCnksezhbSv/xuPWPGhSZ8t5okdMkwvvS+wwrjnkDDswqJcz0Xphw47164qNtyX2MaA+8haiSdo8Zuq5Hfxk0wBOnRY1YSyUmbei6GBMZtDYtXxP0PJkHBS+UB0cdUvvas6CokC3TWWqRsTdTjWBlw1PmrWdzHKXX0NIP0oqrpahmn6kdKWvY36s/imrhtpS0lgq6gTAs8stSB2+6iCRZXDZNbrLeZOFOncy1GoKSahLy9UvTT+7vQ3nq+Y3hSHJxlcjqwWrqWFx2FywpAeySGPnzMGtqpRHPqSYAg9YK1NZYlcr0oojT5XTPrV+uSeR9nV7q/h1EWsBpdt9Wf7hev5kJF3A2Y4NsPwy9uFTDwZliLpNqWl4F4JkEnr9WJJdumdltkUmXsOZ/6ALbOjPu3r0AExQHc=
+  file_glob: true
+  file: release/* 
+  on:
+    repo: yzs981130/cuda-wrapper
