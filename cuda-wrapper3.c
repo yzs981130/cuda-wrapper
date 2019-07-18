@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 //#include <helper_cuda.h>
 #define SIZE 10000
 
@@ -38,6 +40,7 @@ struct HashArray
 }allocsize[10000];
 
 void getCurrentTime(char *buff) {
+    struct tm *sTm;
     time_t now = time (0);
     sTm = gmtime (&now);
     strftime (buff, sizeof(buff), "%Y-%m-%d %H:%M:%S", sTm);

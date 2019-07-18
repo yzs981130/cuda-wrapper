@@ -6,6 +6,8 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 
 #define SIZE 10000
@@ -42,6 +44,7 @@ CUresult __checkCudaErrors( CUresult err, const char *file, const int line ) {
 }
 
 void getCurrentTime(char *buff) {
+    struct tm *sTm;
     time_t now = time (0);
     sTm = gmtime (&now);
     strftime (buff, sizeof(buff), "%Y-%m-%d %H:%M:%S", sTm);
