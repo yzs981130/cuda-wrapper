@@ -25,6 +25,9 @@ gcc -I /usr/local/cuda/include/ cuda-wrapper2.c -fPIC -shared -ldl -lcuda -o ./r
 
 ### Use
 
+[permanent link to libcuda2.so](https://github.com/yzs981130/cuda-wrapper/releases/latest/download/libcuda2.so.10.1)
+
+
 ```bash
 LD_PRELOAD=/path/to/libcuda2.so python test.py
 
