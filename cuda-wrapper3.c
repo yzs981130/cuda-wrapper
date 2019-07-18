@@ -5,7 +5,6 @@
 #include <string.h>
 #include <pthread.h>
 #include <cuda_runtime.h>
-#include <nvml.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <time.h>
@@ -28,8 +27,8 @@ static size_t pytorch_offset_size = 500000000L;
 static pthread_mutex_t mem_cnt_lock;
 char *error;
 char timebuf[30];
-nvmlReturn_t nvmlresult;
-nvmlDevice_t nvmldevice;
+//nvmlReturn_t nvmlresult;
+//nvmlDevice_t nvmldevice;
 
 
 struct HashArray
@@ -114,6 +113,7 @@ void set_quota() {
     }
 }
 
+/*
 void nvml_memquery() {
 	nvmlMemory_t nvmlmemory;
     nvmlresult = nvmlDeviceGetMemoryInfo(nvmldevice, &nvmlmemory);
@@ -121,6 +121,7 @@ void nvml_memquery() {
     printf("Unallocated FB memory  %lld bytes \n", nvmlmemory.free);
     printf("Allocated FB memory %lld bytes \n\n", nvmlmemory.used);
 }
+ */
 
 void init_func() {
     if(open_flag == 0 && handle == NULL) {
