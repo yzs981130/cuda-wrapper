@@ -11,6 +11,7 @@
 unsigned long long mod = 9973L;
 static const char CONFIG_STRING[] = "WRAPPER_MAX_MEMORY";
 static const char LIB_STRING[] = "libcuda.so";
+static const char LOG_FILENAME[] = "/tmp/wrapper-log"
 
 int open_flag = 0;
 void *handle = NULL;
@@ -38,7 +39,7 @@ CUresult __checkCudaErrors( CUresult err, const char *file, const int line ) {
 }
 
 void addHash(unsigned long long key,size_t value) {
-    int temp=key%mod;
+    int temp=key >> 19;
     if(allocsize[temp].key==0) {
         allocsize[temp].key=key;
         allocsize[temp].value=value;
@@ -98,6 +99,8 @@ void set_quota() {
 }
 
 void init_func() {
+    int fd;
+    char *
     if(open_flag == 0 && handle == NULL) {
         //char *error;
     	handle = dlopen (LIB_STRING, RTLD_LAZY);
