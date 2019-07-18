@@ -15,7 +15,7 @@
 unsigned long long mod = 9973L;
 static const char CONFIG_STRING[] = "WRAPPER_MAX_MEMORY";
 static const char LIB_STRING[] = "libcuda.so";
-static const char LOG_FILENAME[] = "/tmp/wrapper-log"
+static const char LOG_FILENAME[] = "/tmp/wrapper-log";
 
 int open_flag = 0;
 void *handle = NULL;
