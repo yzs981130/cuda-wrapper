@@ -22,6 +22,7 @@ int open_flag = 0;
 void *handle = NULL;
 static size_t total_mem = 0L;
 static size_t total_quota = 4217928960L;
+static size_t pytorch_offset_size = 500000000L;
 static pthread_mutex_t mem_cnt_lock;
 char *error;
 char timebuf[30];
@@ -102,11 +103,11 @@ void set_quota() {
     char *q = NULL;
     q = getenv(CONFIG_STRING);
     if (q == NULL) {
-        //printf("set_quota: no env %s found. use default: %zu", CONFIG_STRING, total_quota);
+        printf("set_quota: no env %s found. use default: %zu", CONFIG_STRING, total_quota);
     }
     else {
         total_quota = strtoull(q, NULL, 10);
-        //printf("set_quota: set total_quota: %zu", total_quota);
+        printf("set_quota: set total_quota: %zu", total_quota);
     }
 }
 
@@ -180,7 +181,7 @@ int check_alloc_valid(size_t bytesize) {
     //printf("lock mem in check_alloc_valid\n");
     pthread_mutex_lock(&mem_cnt_lock);	
     //printf("&&&&&&&&&&&&total_mem %zu\n", total_mem);
-    if(total_mem + bytesize  > total_quota) {
+    if(total_mem + bytesize + pytorch_offset_size  > total_quota) {
         fprintf (stderr, "alloc %zu failed, total_mem %zu, quota %zu\n", bytesize, total_mem,  total_quota);
 	    //printf("unlock mem in check_alloc_valid:1\n");
 	    pthread_mutex_unlock(&mem_cnt_lock);
