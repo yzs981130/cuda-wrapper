@@ -21,6 +21,7 @@ static size_t total_mem = 0L;
 static size_t total_quota = 4217928960L; //default set to 4GB
 static pthread_mutex_t mem_cnt_lock;
 char *error;
+char timebuf[30];
 
 struct HashArray
 {
@@ -51,7 +52,7 @@ void addHash(unsigned long long key,size_t value) {
     if(allocsize[temp].key==0) {
         allocsize[temp].key=key;
         allocsize[temp].value=value;
-	    printf("allocsize %lld %zu\n", key, value);
+	    //printf("allocsize %lld %zu\n", key, value);
     } 
     else if(allocsize[temp].key==key) {
         allocsize[temp].value=value;     
@@ -71,25 +72,33 @@ void addHash(unsigned long long key,size_t value) {
             p->value=value;
             p->next=NULL;
         }
-    }   
+    }
+    getCurrentTime(timebuf);
+    printf("addHash\nTime: %s  addHash: key: %lld value: %zu\n", timebuf, key, value);  
 }
 size_t getHash(unsigned long long key) {
     int temp=key%mod;
     struct HashArray *p=&allocsize[temp];
     if (p == NULL) {
-	    printf("miss\n");
+	    printf("getHash miss\n");
+        getCurrentTime(timebuf);
+        printf("Time: %s  key: %lld \n", timebuf, key );
     	return 0;
     }
-    printf("pkey: %lld\n", p->key);
+    //printf("pkey: %lld\n", p->key);
     while(p->key!=key&&p->next!=NULL) {
 	    p=p->next;
     }		
     if (p->key == key) {
-        printf("hit\n");
+        printf("getHash hit\n");
+        getCurrentTime(timebuf);
+        printf("Time: %s  key: %lld value: %zu \n", timebuf, key ,p->value);
         return p->value;
     }
     else {
         printf("hash hit and miss\n");
+        getCurrentTime(timebuf);
+        printf("Time: %s  key: %lld \n", timebuf, key );        
         return 0;
     }
 }
@@ -98,11 +107,11 @@ void set_quota() {
     char *q = NULL;
     q = getenv(CONFIG_STRING);
     if (q == NULL) {
-        printf("set_quota: no env %s found. use default: %zu", CONFIG_STRING, total_quota);
+        //printf("set_quota: no env %s found. use default: %zu", CONFIG_STRING, total_quota);
     }
     else {
         total_quota = strtoull(q, NULL, 10);
-        printf("set_quota: set total_quota: %zu", total_quota);
+        //printf("set_quota: set total_quota: %zu", total_quota);
     }
 }
 
@@ -126,11 +135,15 @@ void init_func() {
        	    fprintf (stderr, "%s\n", dlerror());
        	    exit(1);
     	}
+
 	    open_flag = 1;
     	dlerror();
     }
     pthread_mutex_init(&mem_cnt_lock, NULL);
     set_quota();
+    printf("Init!\n");
+    getCurrentTime(timebuf);
+    printf("Time: %s  total_quota: %zu\n", timebuf, total_quota);
 }
 
 void before_func() {
@@ -146,7 +159,7 @@ void post_func() {
 CUresult cuInit(unsigned int Flags) {
     init_func();
     before_func();
-    printf("init!!!\n");
+    //printf("init!!!\n");
     CUresult (*fakecuInit)(unsigned int);
     fakecuInit = dlsym(handle, "cuInit");
 
@@ -174,21 +187,21 @@ CUresult cuMemGetInfo_v2(size_t *free, size_t *total) {
     //TODO: change free and total to proper value
     //*free =  *free / 2;
     //*total = *total / 2;
-    printf("cumemgetinfo: free : %zu, total : %zu\n", *free, *total);
+    //printf("cumemgetinfo: free : %zu, total : %zu\n", *free, *total);
     post_func();
     return r;
 }
 
 int check_alloc_valid(size_t bytesize) {
-    printf("lock mem in check_alloc_valid\n");
+    //printf("lock mem in check_alloc_valid\n");
     pthread_mutex_lock(&mem_cnt_lock);	
     if(total_mem + bytesize > total_quota) {
         fprintf (stderr, "alloc %zu failed, total_mem %zu, quota %zu\n", bytesize, total_mem,  total_quota);
-        printf("unlock mem in check_alloc_valid\n");
+        //printf("unlock mem in check_alloc_valid\n");
         pthread_mutex_unlock(&mem_cnt_lock);
         return 0;
     }
-    printf("unlock mem in check\n");
+    //printf("unlock mem in check\n");
     pthread_mutex_unlock(&mem_cnt_lock);
     return 1;
 }
@@ -204,26 +217,29 @@ CUresult cuMemAlloc_v2(CUdeviceptr* dptr, size_t bytesize) {
     post_func();
 
     if(check_alloc_valid(bytesize)) {
-        printf("lock mem in cumemalloc\n");
+        //printf("lock mem in cumemalloc\n");
         pthread_mutex_lock(&mem_cnt_lock);
         total_mem += bytesize;
         //printf("%d\n", dptr);
         //printf("bs: %zu\n", bytesize);
         pthread_mutex_unlock(&mem_cnt_lock);
-        printf("unlock mem in cumemalloc\n");
+        //printf("unlock mem in cumemalloc\n");
         CUresult r = checkCudaErrors((*fakecuMemAlloc_v2)(dptr, bytesize));
         if(CUDA_SUCCESS != r) {
-            printf("lock if r != CUDA_SUCCESS\n");
+            //printf("lock if r != CUDA_SUCCESS\n");
             pthread_mutex_lock(&mem_cnt_lock);
             total_mem -= bytesize;                  
             pthread_mutex_unlock(&mem_cnt_lock);
-            printf("unlock if r != CUDA_SUCCESS\n ");
+            //printf("unlock if r != CUDA_SUCCESS\n ");
         }
         else {			
             addHash((unsigned long long)dptr,bytesize);
             //TODO: assert
-            printf("cumemalloc: hash insert with bytesize %zu\n", bytesize);
-            printf("cumemalloc: hash insert with bytesize %zu\n", getHash((unsigned long long)dptr));
+            //printf("cumemalloc: hash insert with bytesize %zu\n", bytesize);
+            //printf("cumemalloc: hash insert with bytesize %zu\n", getHash((unsigned long long)dptr));
+            getCurrentTime(timebuf);
+            printf("cuMemAlloc_v2\nTime: %s  total_mem: %zu bytesize: %zu total_quota: %zu \n", timebuf, total_mem, bytesize, total_quota);
+
         }
         return r;
     }
@@ -243,13 +259,15 @@ CUresult cuMemFree_v2(CUdeviceptr dptr) {
     post_func();
     CUresult r = checkCudaErrors((*fakecuMemFree_v2)(dptr));
     if(CUDA_SUCCESS == r) {
-        printf("lock mem in cumemfree\n");
+        //printf("lock mem in cumemfree\n");
         pthread_mutex_lock(&mem_cnt_lock);
         size_t tbytesize=getHash(dptr);
-        printf("%lld %zu",dptr, tbytesize);
+        //printf("%lld %zu",dptr, tbytesize);
         total_mem -= tbytesize;
-        printf("lock mem in cumemfree\n");
+        //printf("lock mem in cumemfree\n");
         pthread_mutex_unlock(&mem_cnt_lock);
+        getCurrentTime(timebuf);
+        printf("cuMemFree_v2\nTime: %s  total_mem: %zu bytesize: %zu total_quota: %zu \n", timebuf, total_mem, tbytesize, total_quota);
     }
     return r;
 }
