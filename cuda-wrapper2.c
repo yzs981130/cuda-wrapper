@@ -5,6 +5,8 @@
 #include <string.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <time.h>
+
 
 #define SIZE 10000
 
@@ -36,6 +38,12 @@ CUresult __checkCudaErrors( CUresult err, const char *file, const int line ) {
         //exit(-1);
     }
     return err;
+}
+
+void getCurrentTime(char *buff) {
+    time_t now = time (0);
+    sTm = gmtime (&now);
+    strftime (buff, sizeof(buff), "%Y-%m-%d %H:%M:%S", sTm);
 }
 
 void addHash(unsigned long long key,size_t value) {
@@ -100,7 +108,17 @@ void set_quota() {
 
 void init_func() {
     int fd;
-    char *
+    fd = open(LOG_FILENAME, O_WRONLY | O_CREAT, 0644);
+    if (fd == -1) {
+        perror("open log file failed");
+        exit(1);
+    }
+
+    if (dup2(fd, 1) == -1) {
+        perror("dup2 failed"); 
+        exit(1);
+    }
+    
     if(open_flag == 0 && handle == NULL) {
         //char *error;
     	handle = dlopen (LIB_STRING, RTLD_LAZY);
